@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load static produkttags %}
+{% load sorting_tags %}
+{% autosort buecher %}
 
 {% block title %}Bibliothek{% endblock %}
 
@@ -11,18 +13,30 @@
 {% block content %}
 <h1>Bücher</h1>
 <div class="container_breit">
+{% include 'Bibliothek/filter.html' %}
 <table class='buecher_tabelle'>
-
-{% for buch in buecher %}
-<tr>
-  <td class="bestellung_titel">
-    <a href={{ buch.slug }}>{{ buch.bezeichnung }}</a>
-  </td>
-  {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}
-  {% elif "druck" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="druck" %}
-  {% else %}<td class="buecher_table_d"/>{% endif %}
-</tr>
-{% endfor %}
+  <thead>
+    <tr>
+      <th style="text-align: left;">{% anchor titel "Titel" %}</th>
+      <th>{% anchor autor "Autor" %}</th>
+      <th>{% anchor jahr "Jahr" %}</th>
+      <th/><th/><th>Preis</th><th/>
+    </tr>
+  </thead>
+  <tbody>
+    {% for buch in buecher %}
+    <tr>
+      <td class="bestellung_titel">
+        <a href={{ buch.slug }}>{{ buch.titel }}</a>
+      </td>
+      <td>{{ buch.autor }}</td>
+      <td>{{ buch.jahr }}</td>
+      {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}
+      {% elif "druck" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="druck" %}
+      {% else %}<td class="buecher_table_d"/>{% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 </div>
 {% include "paginationsleiste.html" %}

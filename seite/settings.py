@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_cron',
     'google_analytics',
+    'webstack_django_sorting',
 ]
 
 MIDDLEWARE_CLASSES = [

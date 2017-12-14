@@ -7,12 +7,19 @@ from django.conf import settings
 from Grundgeruest.views import ListeMitMenue
 
 
-def liste_buecher(request):
-    return ListeMitMenue.as_view(
-        template_name='Bibliothek/buecher_alt.html',
-        model=models.Buch,
-        context_object_name='buecher',
-        paginate_by=80)(request, page=request.GET.get('seite'))
+class ListeBuecher(ListeMitMenue):
+    template_name = 'Bibliothek/buecher_alt.html'
+    model = models.Buch
+    context_object_name = 'buecher'
+    paginate_by = 80
+
+    def get_queryset(self):
+        sort = self.request.GET.get('sort', '')
+        if sort:
+            sort = "-" + sort if self.request.GET.get('dir', '') == 'desc' else sort
+            return models.Buch.objects.all().order_by(sort)
+        else:
+            return models.Buch.objects.all()
 
 
 attributnamen = {

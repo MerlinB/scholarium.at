@@ -1,3 +1,5 @@
+{% load sorting_tags %}
+{% autosort buecher %}
 {% extends "base.html" %}
 {% load static %}
 
@@ -5,9 +7,15 @@
 
 {% block content %}
 {% include "paginationsleiste.html" %}
-  <ul style="margin: 1em 4em; text-size: 120%;">
+  <table>
+    <tr>
+      <th>{% anchor titel _("Titel") %}</th>
+    </tr>
+  <!-- <ul style="margin: 1em 4em; text-size: 120%;"> -->
   {% for buch in buecher %}
-    <li><a href="{% url 'Bibliothek:detail_buch' buch.slug %}">{{ buch }}</a></li>
+    <tr>
+      <td><a href="{% url 'Bibliothek:detail_buch' buch.slug %}">{{ buch.titel }}</a><td>
+    </tr>
   {% endfor %}
-  </ul>
+  <!-- </ul> -->
 {% endblock content %}
