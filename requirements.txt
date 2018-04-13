@@ -65,3 +65,4 @@ typing==3.6.2
 Unidecode==0.4.21
 urllib3==1.22
 wcwidth==0.1.7
+webstack-django-sorting==1.0.1
