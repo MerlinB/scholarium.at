@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 import re
 import os
 from .models import Buch
@@ -7,11 +7,16 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from pyzotero import zotero
+from pprint import pprint
 
 
 @login_required
 def liste_buecher(request):
-    buecher = Buch.objects.all()
+    zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
+    buecher = zot.top(limit=5)
+    pprint(buecher)
+
     page = request.GET.get('seite')
     sort = request.GET.get('sort', '')
 
@@ -33,7 +38,14 @@ def liste_buecher(request):
         'buecher': buecher,
         'paginator': paginator
     }
-    return render(request, 'Bibliothek/buecher_alt.html', context)
+    return render(request, 'Bibliothek/buecher.html', context)
+
+
+@login_required
+def detail_buch(request, id):
+    zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
+    buch = zot.item(id)
+    return render(request, 'Bibliothek/detail_buch.html', {'buch': buch})
 
 
 attributnamen = {

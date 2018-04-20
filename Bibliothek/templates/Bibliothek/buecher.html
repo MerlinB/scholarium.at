@@ -11,7 +11,7 @@
 {% endblock head %}
 
 {% block content %}
-<h1>Bücher</h1>
+<h1>Bibliothek</h1>
 <div class="container_breit">
 {% include 'Bibliothek/filter.html' %}
 <table class='buecher_tabelle'>
@@ -19,6 +19,7 @@
     <tr>
       <th style="text-align: left;">{% anchor titel "Titel" %}</th>
       <th>{% anchor autor "Autor" %}</th>
+      <th>{% anchor sprache 'Sprache' %}</th>
       <th>{% anchor jahr "Jahr" %}</th>
       <th/><th/><th>Preis</th><th/>
     </tr>
@@ -27,10 +28,17 @@
     {% for buch in buecher %}
     <tr>
       <td class="bestellung_titel">
-        <a href={{ buch.slug }}>{{ buch.titel }}</a>
+        <a href={{ buch.data.key }}>{{ buch.data.title }}</a>
       </td>
-      <td>{{ buch.autor }}</td>
-      <td>{{ buch.jahr }}</td>
+      <td>
+        {% for creator in buch.data.creators %}
+          <a href="#">{{ creator.firstName }} {{ creator.lastName }}</a><br>
+        {% endfor %}
+      </td>
+      <td>
+        {{ buch.data.language }}
+      </td>
+      <td>{{ buch.data.date }}</td>
       {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}
       {% elif "druck" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="druck" %}
       {% else %}<td class="buecher_table_d"/>{% endif %}

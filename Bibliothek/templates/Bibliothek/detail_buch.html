@@ -3,28 +3,20 @@
 
 {% block content %}
   <div class="veranstaltung">
-    <h1>{% block title %}{% if buch.title %}{{ buch.titel|safe }}{% else %}{{ buch.bezeichnung }}{% endif %}{% endblock %}</h1>
+    <h1>{{ buch.data.title }}</h1>
     <div>
-      {% if buch.autor %}{{ buch.autor }}{% endif %}
+      {% for creator in buch.data.creators %}
+        {{ creator.firstName }} {{ creator.lastName }}<br>
+      {% endfor %}
     </div>
   </div>
   <div class="salon_content">
     <ul style="margin: 1em 4em; text-size: 120%;">
-      <!-- TODO: Durch alle Felder iterieren -->
-      {% if buch.isbn %}<li> ISBN: {{ buch.isbn }} </li>{% endif %}
-      {% if buch.jahr %}<li> Jahr: {{ buch.jahr }} </li>{% endif %}
-      {% if buch.sprache %}<li> Sprache: {{ buch.sprache }} </li>{% endif %}
-      {% if buch.zusammenfassung %}<li> Zusammenfassung: {{ buch.zusammenfassung }} </li>{% endif %}
+      {% if buch.data.ISBN %}<li> ISBN: {{ buch.data.ISBN }} </li>{% endif %}
+      {% if buch.data.date %}<li> Jahr: {{ buch.data.date }} </li>{% endif %}
+      {% if buch.data.language %}<li> Sprache: {{ buch.data.language }} </li>{% endif %}
+      {% if buch.data.numPages %}<li> Seitenzahl: {{ buch.data.numPages }} </li>{% endif %}
+      {% if buch.data.url %}<li> Link: <a>{{ buch.data.url }}</a> </li>{% endif %}
     </ul>
-     {% if buch.arten_aktiv|length > 1 %}<table class="buecher_tabelle buecher_korb sinfo" style="width: 30%; margin: auto; border: 0;">
-    {% for kaufart in buch.arten_aktiv %}
-      <tr>
-        {% anzeigemodus buch kaufart as modus %}
-        {% include "Produkte/in_den_warenkorb_"|add:modus|add:".html" with produkt=buch art=kaufart %}
-      </tr>
-    {% endfor %}
-  </table>{% elif buch.arten_aktiv|length == 1 %}
-    {% include "Veranstaltungen/buchung_veranstaltung_unten.html" with veranstaltung=buch %}
-  {% endif %}
   </div>
 {% endblock content %}

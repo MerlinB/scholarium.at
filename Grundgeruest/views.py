@@ -172,7 +172,7 @@ def erstelle_liste_menue(user=None):
             ({'bezeichnung': 'Vortrag', 'slug': 'vortrag'}, [
              {'bezeichnung': 'Aufzeichnungen', 'slug': 'vortrag#medien'}
              ]),
-            ({'bezeichnung': 'Bücher', 'slug': 'buecher'}, [
+            ({'bezeichnung': 'Bibliothek', 'slug': 'buecher'}, [
              ]),
             ({'bezeichnung': 'Studium', 'slug': 'studium'}, [
              {'bezeichnung': 'Studium Generale', 'slug': 'studium/studium'},
