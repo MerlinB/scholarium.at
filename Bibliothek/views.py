@@ -1,25 +1,39 @@
 from django.http import HttpResponseRedirect
 import re
 import os
-from . import models
+from .models import Buch
 from django.db import transaction
 from django.conf import settings
-from Grundgeruest.views import ListeMitMenue
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-class ListeBuecher(ListeMitMenue):
-    template_name = 'Bibliothek/buecher_alt.html'
-    model = models.Buch
-    context_object_name = 'buecher'
-    paginate_by = 80
+@login_required
+def liste_buecher(request):
+    buecher = Buch.objects.all()
+    page = request.GET.get('seite')
+    sort = request.GET.get('sort', '')
 
-    def get_queryset(self):
-        sort = self.request.GET.get('sort', '')
-        if sort:
-            sort = "-" + sort if self.request.GET.get('dir', '') == 'desc' else sort
-            return models.Buch.objects.all().order_by(sort)
-        else:
-            return models.Buch.objects.all()
+    if sort:
+        sort = "-" + sort if request.GET.get('dir', '') == 'desc' else sort
+        buecher = buecher.order_by(sort)
+
+    paginator = Paginator(buecher, 20)
+    try:
+        buecher = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        buecher = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        buecher = paginator.page(paginator.num_pages)
+
+    context = {
+        'buecher': buecher,
+        'paginator': paginator
+    }
+    return render(request, 'Bibliothek/buecher_alt.html', context)
 
 
 attributnamen = {
@@ -52,7 +66,7 @@ def aus_datei_einlesen(request, exlibris=''):
         matches = [teilsplit.match(zeile) for zeile in zeilen[1:]]
         daten = dict([match.groups() for match in matches if match])
 
-        buch = models.Buch.objects.create(bezeichnung=bezeichnung)
+        buch = Buch.objects.create(bezeichnung=bezeichnung)
         buch.exlibris = exlibris
         for key in daten:
             if key in attributnamen:
