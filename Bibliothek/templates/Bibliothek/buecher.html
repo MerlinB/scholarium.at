@@ -13,14 +13,17 @@
 {% block content %}
 <h1>Bibliothek</h1>
 <div class="container_breit">
-{% include 'Bibliothek/filter.html' %}
+<form method="get">
+  {{ form }}
+  <button type="submit">Filter</button>
+</form>
 <table class='buecher_tabelle'>
   <thead>
     <tr>
-      <th style="text-align: left;">{% anchor titel "Titel" %}</th>
-      <th>{% anchor autor "Autor" %}</th>
-      <th>{% anchor sprache 'Sprache' %}</th>
-      <th>{% anchor jahr "Jahr" %}</th>
+      <th style="text-align: left;">{% anchor title "Titel" %}</th>
+      <th>{% anchor creators "Autor" %}</th>
+      <th>{% anchor language 'Sprache' %}</th>
+      <th>{% anchor date "Jahr" %}</th>
       <th/><th/><th>Preis</th><th/>
     </tr>
   </thead>
@@ -36,7 +39,7 @@
         {% endfor %}
       </td>
       <td>
-        {{ buch.data.language }}
+        {{ buch.data.language }}{{ buch.data.itemType }}
       </td>
       <td>{{ buch.data.date }}</td>
       {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}

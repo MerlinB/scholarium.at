@@ -16,7 +16,7 @@
       {% if buch.data.date %}<li> Jahr: {{ buch.data.date }} </li>{% endif %}
       {% if buch.data.language %}<li> Sprache: {{ buch.data.language }} </li>{% endif %}
       {% if buch.data.numPages %}<li> Seitenzahl: {{ buch.data.numPages }} </li>{% endif %}
-      {% if buch.data.url %}<li> Link: <a>{{ buch.data.url }}</a> </li>{% endif %}
+      {% if buch.data.url %}<li><a href="{{ buch.data.url }}">Link</a> </li>{% endif %}
     </ul>
   </div>
 {% endblock content %}

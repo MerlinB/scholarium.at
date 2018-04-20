@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 import re
 import os
 from .models import Buch
@@ -6,37 +6,50 @@ from django.db import transaction
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pyzotero import zotero
-from pprint import pprint
+from .forms import SearchForm
 
 
 @login_required
 def liste_buecher(request):
     zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
-    buecher = zot.top(limit=5)
-    pprint(buecher)
+    parameters = {}
+
+    search = request.GET.get('search')
+    if search:
+        parameters['q'] = search
+
+    parameters['limit'] = 25
+
+    sort = request.GET.get('sort')
+    if sort:
+        direction = request.GET.get('dir', 'asc')
+        parameters['sort'] = sort
+        parameters['direction'] = direction
+        print(sort, direction)
 
     page = request.GET.get('seite')
-    sort = request.GET.get('sort', '')
 
-    if sort:
-        sort = "-" + sort if request.GET.get('dir', '') == 'desc' else sort
-        buecher = buecher.order_by(sort)
+    show = 10
+    if page:
+        start = show * (int(page) - 1)
+        parameters['limit'] = show
+        parameters['start'] = start
 
-    paginator = Paginator(buecher, 20)
-    try:
-        buecher = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        buecher = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        buecher = paginator.page(paginator.num_pages)
+    buecher = zot.items(**parameters)
+    total = int(zot.request.headers['Total-Results'])
+
+    paginator = {
+        'page_range': range(int(round(total / show + 0.5))),
+        'num_pages': total
+    }
+
+    print(request.GET.urlencode())  # TODO: seite ersetzen, statt alles ersetzen.
 
     context = {
         'buecher': buecher,
-        'paginator': paginator
+        'paginator': paginator,
+        'form': SearchForm
     }
     return render(request, 'Bibliothek/buecher.html', context)
 
