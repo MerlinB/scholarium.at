@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'django_cron',
     'google_analytics',
     'webstack_django_sorting',
+    'mathfilters',
 ]
 
 MIDDLEWARE_CLASSES = [

@@ -38,11 +38,14 @@ def liste_buecher(request):
 
     buecher = zot.items(**parameters)
     total = int(zot.request.headers['Total-Results'])
+    pages = int(round(total / show + 0.4999))  # round up
 
     paginator = {
-        'page_range': range(1, int(round(total / show + 0.5))),
-        'num_pages': total
+        'page_range': range(1, pages + 1),
+        'num_pages': pages
     }
+    
+    print(total, show, total / show, paginator)
 
     context = {
         'buecher': buecher,

@@ -21,6 +21,7 @@ django-easycart==0.4.0
 django-extensions==1.7.5
 django-google-analytics-app==4.3.0
 django-guardian==1.4.9
+django-mathfilters==0.4.0
 django-userena==2.0.1
 docutils==0.13.1
 easy-thumbnails==2.4.2
