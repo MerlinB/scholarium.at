@@ -1,3 +1,4 @@
+  {% load static tags %}
   {% spaceless %}
   {% with seiten=paginator.page_range anzahl=paginator.num_pages %}
   {% firstof request.GET.seite "1" as aktuell %}
@@ -6,19 +7,19 @@
       {% if aktuell == "1" %}
         <span class="disabled">&laquo; zurück</span>
       {% else %}
-        <a href="?seite={{ aktuell|add:"-1" }}">&laquo; zurück</a>
+        <a href="?{% url_replace request 'seite' aktuell|add:'-1' %}">&laquo; zurück</a>
       {% endif %}
       {% for nr in seiten %}
         {% if aktuell == nr|stringformat:"i" %}
         <span class="current">{{ nr }}</span>
         {% else %}
-        <a href="?seite={{ nr }}" class="current">{{ nr }}</a>
+        <a href="?{% url_replace request 'seite' nr %}" class="current">{{ nr }}</a>
         {% endif %}
       {% endfor %}
       {% if aktuell == anzahl|stringformat:"i" or 'last' == aktuell %}
         <span class="disabled">vor &raquo;</span>
       {% else %}
-        <a href="?seite={{ aktuell|add:"1" }}">vor &raquo;</a>
+        <a href="?{% url_replace request 'seite' aktuell|add:'1' %}">vor &raquo;</a>
       {% endif %}
     </div></table>
   {% endif %}

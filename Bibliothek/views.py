@@ -40,11 +40,9 @@ def liste_buecher(request):
     total = int(zot.request.headers['Total-Results'])
 
     paginator = {
-        'page_range': range(int(round(total / show + 0.5))),
+        'page_range': range(1, int(round(total / show + 0.5))),
         'num_pages': total
     }
-
-    print(request.GET.urlencode())  # TODO: seite ersetzen, statt alles ersetzen.
 
     context = {
         'buecher': buecher,
