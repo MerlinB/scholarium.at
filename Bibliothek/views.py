@@ -32,9 +32,9 @@ def liste_buecher(request):
     page = request.GET.get('seite')
 
     show = 10
+    parameters['limit'] = show
     if page:
         start = show * (int(page) - 1)
-        parameters['limit'] = show
         parameters['start'] = start
 
     buecher = zot.items(**parameters)
@@ -51,9 +51,8 @@ def liste_buecher(request):
         if buch['meta']['numChildren']:
             buch['children'] = zot.children(buch['data']['key'])
             for child in buch['children']:
-                if child['data']['itemType'] == 'attachment':
+                if child['data']['itemType'] == 'attachment' and 'filename' in child['data']:
                     buch['format'].append(child['data']['filename'].split('.')[-1])
-        pprint(buch)
 
     context = {
         'buecher': buecher,

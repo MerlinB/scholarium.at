@@ -2,7 +2,7 @@ from django import forms
 
 
 class SearchForm(forms.Form):
-    
+
     choices = [
         ('pdf', 'PDF'),
         ('epub', 'EPUB'),
@@ -11,6 +11,6 @@ class SearchForm(forms.Form):
     ]
 
     search = forms.CharField(required=False, max_length=100, label='Suche')
-    type = forms.MultipleChoiceField(choices=choices, widget=forms.CheckboxSelectMultiple,
-                                     label='Verfügbarkeit')
-    
+    # Geht nicht bei direkter API-Implementierung:
+    # type = forms.MultipleChoiceField(choices=choices, widget=forms.CheckboxSelectMultiple,
+    #                                  label='Verfügbarkeit')
