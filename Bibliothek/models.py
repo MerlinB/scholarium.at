@@ -3,6 +3,18 @@ from Produkte.models import KlasseMitProdukten
 from django.urls import reverse
 
 
+class Autor(models.Model):
+    vorname = models.CharField(max_length=255)
+    nachname = models.CharField(max_length=255)
+
+
+class Zotero_Buch(KlasseMitProdukten):
+    arten_liste = ['kaufen', 'leihen', 'druck', 'pdf', 'mobi', 'epub']
+    autoren = models.ManyToManyField(Autor)
+    jahr = models.DateField(blank=True, null=True)
+    sprache = models.CharField(max_length=100, blank=True, null=True)
+
+
 class Altes_Buch(KlasseMitProdukten):
     arten_liste = ['kaufen']
     autor_und_titel = models.CharField(
