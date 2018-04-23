@@ -18,5 +18,6 @@
       {% if buch.data.numPages %}<li> Seitenzahl: {{ buch.data.numPages }} </li>{% endif %}
       {% if buch.data.url %}<li><a href="{{ buch.data.url }}">Link</a> </li>{% endif %}
     </ul>
+    {% if buch.data.abstractNote %}<p>{{ buch.data.abstractNote }}</p>{% endif %}
   </div>
 {% endblock content %}

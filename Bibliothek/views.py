@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from pyzotero import zotero
 from .forms import SearchForm
+from pprint import pprint
 
 
 @login_required
@@ -19,7 +20,7 @@ def liste_buecher(request):
     if search:
         parameters['q'] = search
 
-    parameters['limit'] = 25
+    parameters['itemType'] = 'book'
 
     sort = request.GET.get('sort')
     if sort:
@@ -44,8 +45,15 @@ def liste_buecher(request):
         'page_range': range(1, pages + 1),
         'num_pages': pages
     }
-    
-    print(total, show, total / show, paginator)
+
+    for buch in buecher:
+        buch['format'] = []
+        if buch['meta']['numChildren']:
+            buch['children'] = zot.children(buch['data']['key'])
+            for child in buch['children']:
+                if child['data']['itemType'] == 'attachment':
+                    buch['format'].append(child['data']['filename'].split('.')[-1])
+        pprint(buch)
 
     context = {
         'buecher': buecher,
