@@ -20,32 +20,39 @@
 <table class='buecher_tabelle'>
   <thead>
     <tr>
-      <th style="text-align: left;">{% anchor title "Titel" %}</th>
-      <th>{% anchor creators "Autor" %}</th>
-      <th>{% anchor language 'Sprache' %}</th>
-      <th>{% anchor date "Jahr" %}</th>
+      <th style="text-align: left;">{% anchor bezeichnung "Titel" %}</th>
+      <th>{% anchor autoren "Autor" %}</th>
+      <th>{% anchor sprache 'Sprache' %}</th>
+      <th>{% anchor jahr "Jahr" %}</th>
       <th>Verfügbarkeit</th>
-      <th/><th/><th>Preis</th><th/>
+      <th/><th/><th>Preis</th>
+      <th/>
     </tr>
   </thead>
   <tbody>
     {% for buch in buecher %}
     <tr>
       <td class="bestellung_titel">
-        <a href={{ buch.data.key }}>{{ buch.data.title }}</a>
+        <a href={{ buch.slug }}>{{ buch.bezeichnung }}</a>
       </td>
       <td>
-        {% for creator in buch.data.creators %}
-          <a href="?search={{ creator.firstName}}%20{{ creator.lastName }}">{{ creator.firstName }} {{ creator.lastName }}</a><br>
+        {% for autor in buch.autoren.all %}
+          <a href="?search={{ autor.vorname }}%20{{ autor.nachname }}">{{ autor.vorname }} {{ autor.nachname }}</a><br>
         {% endfor %}
       </td>
       <td>
-        {{ buch.data.language }}
+        {% if buch.sprache %}
+          {{ buch.sprache }}
+        {% endif %}
       </td>
-      <td>{{ buch.data.date }}</td>
       <td>
-        {% for type in buch.format %}
-          {{ type }}
+        {% if buch.jahr %}
+          {{ buch.jahr.year }}
+        {% endif %}
+      </td>
+      <td>
+        {% for art in buch.arten_aktiv %}
+          {% button_text buch art %}
         {% endfor %}
       </td>
       {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}

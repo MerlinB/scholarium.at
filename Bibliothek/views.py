@@ -1,58 +1,62 @@
 from django.http import HttpResponseRedirect
 import re
 import os
-from .models import Buch
+from .models import Buch, Zotero_Buch, Autor
 from django.db import transaction
+from django.db.models import Q, Value
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from pyzotero import zotero
 from .forms import SearchForm
 from pprint import pprint
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models.functions import Concat
 
 
 @login_required
 def liste_buecher(request):
-    zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
-    parameters = {}
-
-    search = request.GET.get('search')
-    if search:
-        parameters['q'] = search
-
-    parameters['itemType'] = 'book'
+    '''Gibt die Bibliotheks-Tabelle aus.
+    '''
 
     sort = request.GET.get('sort')
-    if sort:
-        direction = request.GET.get('dir', 'asc')
-        parameters['sort'] = sort
-        parameters['direction'] = direction
-        print(sort, direction)
-
+    search = request.GET.get('search')
     page = request.GET.get('seite')
+    types = request.GET.getlist('type')
 
-    show = 10
-    parameters['limit'] = show
-    if page:
-        start = show * (int(page) - 1)
-        parameters['start'] = start
+    # Filter for search term
+    if search:
+        buecher = Zotero_Buch.objects.annotate(autoren__name=Concat('autoren__vorname', Value(' '), 'autoren__nachname')) \
+                                     .filter(Q(bezeichnung__icontains=search) | Q(autoren__name__icontains=search))
+        buecher = buecher.distinct()
+    else:
+        buecher = Zotero_Buch.objects.all()
 
-    buecher = zot.items(**parameters)
-    total = int(zot.request.headers['Total-Results'])
-    pages = int(round(total / show + 0.4999))  # round up
+    # Filter for format type
+    if types:
+        types_dict = {}
+        for type in types:
+            types_dict['ob_%s' % type] = True
+            types_dict['%s__isnull' % type] = False
+        buecher = buecher.filter(**types_dict)
 
-    paginator = {
-        'page_range': range(1, pages + 1),
-        'num_pages': pages
-    }
+    # Table sort
+    if sort:
+        sort = "-" + sort if request.GET.get('dir', '') == 'desc' else sort
+        buecher = buecher.order_by(sort)
+    else:
+        buecher = buecher.order_by('-jahr')
 
-    for buch in buecher:
-        buch['format'] = []
-        if buch['meta']['numChildren']:
-            buch['children'] = zot.children(buch['data']['key'])
-            for child in buch['children']:
-                if child['data']['itemType'] == 'attachment' and 'filename' in child['data']:
-                    buch['format'].append(child['data']['filename'].split('.')[-1])
+    # Pagination
+    paginator = Paginator(buecher, 10)
+    try:
+        buecher = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        buecher = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        buecher = paginator.page(paginator.num_pages)
 
     context = {
         'buecher': buecher,

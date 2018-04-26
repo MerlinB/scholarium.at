@@ -4,8 +4,11 @@ from django.urls import reverse
 
 
 class Autor(models.Model):
-    vorname = models.CharField(max_length=255)
+    vorname = models.CharField(max_length=255, blank=True, null=True)
     nachname = models.CharField(max_length=255)
+
+    def __str__(self):
+        return '%s %s' % (self.vorname, self.nachname)
 
 
 class Zotero_Buch(KlasseMitProdukten):
@@ -13,6 +16,9 @@ class Zotero_Buch(KlasseMitProdukten):
     autoren = models.ManyToManyField(Autor)
     jahr = models.DateField(blank=True, null=True)
     sprache = models.CharField(max_length=100, blank=True, null=True)
+    pdf = models.CharField(max_length=50, blank=True, null=True)
+    mobi = models.CharField(max_length=50, blank=True, null=True)
+    epub = models.CharField(max_length=50, blank=True, null=True)
 
 
 class Altes_Buch(KlasseMitProdukten):
