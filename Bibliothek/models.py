@@ -1,6 +1,11 @@
 from django.db import models
 from Produkte.models import KlasseMitProdukten
 from django.urls import reverse
+from seite.models import Grundklasse
+
+
+class Kollektion(Grundklasse):
+    parent = models.ForeignKey('self', blank=True, null=True)
 
 
 class Autor(models.Model):
@@ -12,13 +17,26 @@ class Autor(models.Model):
 
 
 class Zotero_Buch(KlasseMitProdukten):
+    # TODO: Use django translation instead?
+    trans = {
+        'Deutsch': ['German', 'de', 'ger'],
+        'Englisch': ['English', 'en']
+    }
+    langs = dict([(v, k) for k, values in trans.items() for v in values])
     arten_liste = ['kaufen', 'leihen', 'druck', 'pdf', 'mobi', 'epub']
+
     autoren = models.ManyToManyField(Autor)
     jahr = models.DateField(blank=True, null=True)
     sprache = models.CharField(max_length=100, blank=True, null=True)
     pdf = models.CharField(max_length=50, blank=True, null=True)
     mobi = models.CharField(max_length=50, blank=True, null=True)
     epub = models.CharField(max_length=50, blank=True, null=True)
+    kollektion = models.ForeignKey(Kollektion, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.sprache in self.langs:
+            self.sprache = self.langs[self.sprache]
+        super().save(*args, **kwargs)
 
 
 class Altes_Buch(KlasseMitProdukten):

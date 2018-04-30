@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Buch, Zotero_Buch, Autor
+from .models import Buch, Zotero_Buch, Autor, Kollektion
 
 
 @admin.register(Buch)
@@ -12,3 +12,4 @@ class BuchAdmin(admin.ModelAdmin):
 
 admin.site.register(Zotero_Buch)
 admin.site.register(Autor)
+admin.site.register(Kollektion)
