@@ -9,6 +9,7 @@ from django.shortcuts import render
 from pyzotero import zotero
 from .forms import SearchForm
 from pprint import pprint
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 @login_required
@@ -20,7 +21,7 @@ def liste_buecher(request):
     if search:
         parameters['q'] = search
 
-    parameters['itemType'] = 'book'
+    # parameters['itemType'] = 'book'
 
     sort = request.GET.get('sort')
     if sort:
@@ -29,33 +30,38 @@ def liste_buecher(request):
         parameters['direction'] = direction
         print(sort, direction)
 
-    page = request.GET.get('seite')
+    page = request.GET.get('seite') or 1
 
-    show = 10
-    parameters['limit'] = show
-    if page:
-        start = show * (int(page) - 1)
-        parameters['start'] = start
+    # show = 10
+    # parameters['limit'] = show
 
-    buecher = zot.items(**parameters)
-    total = int(zot.request.headers['Total-Results'])
-    pages = int(round(total / show + 0.4999))  # round up
+    # if page:
+    #     start = show * (int(page) - 1)
+    #     parameters['start'] = start
 
-    paginator = {
-        'page_range': range(1, pages + 1),
-        'num_pages': pages
-    }
+    buecher = zot.collection_items('HJ4PBWFR', **parameters)
+    # total = int(zot.request.headers['Total-Results'])
+    # pages = int(round(total / show + 0.4999))  # round up
 
-    for buch in buecher:
-        buch['format'] = []
-        if buch['meta']['numChildren']:
-            buch['children'] = zot.children(buch['data']['key'])
-            for child in buch['children']:
-                if child['data']['itemType'] == 'attachment' and 'filename' in child['data']:
-                    buch['format'].append(child['data']['filename'].split('.')[-1])
+    # paginator = {
+    #     'page_range': range(1, pages + 1),
+    #     'num_pages': pages
+    # }
+
+    paginator = Paginator(buecher, 10)
+
+    # for buch in buecher:
+    #     buch['format'] = []
+    #     if buch['meta']['numChildren']:
+    #         buch['children'] = zot.children(buch['data']['key'])
+    #         for child in buch['children']:
+    #             if child['data']['itemType'] == 'attachment' and 'filename' in child['data']:
+    #                 buch['format'].append(child['data']['filename'].split('.')[-1])
+
+    buecher_show = paginator.page(page)
 
     context = {
-        'buecher': buecher,
+        'buecher': buecher_show,
         'paginator': paginator,
         'form': SearchForm
     }
