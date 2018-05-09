@@ -31,7 +31,7 @@ class Zotero_Buch(KlasseMitProdukten):
     pdf = models.CharField(max_length=50, blank=True, null=True)
     mobi = models.CharField(max_length=50, blank=True, null=True)
     epub = models.CharField(max_length=50, blank=True, null=True)
-    kollektion = models.ForeignKey(Kollektion, on_delete=models.SET_NULL, blank=True, null=True)
+    kollektion = models.ManyToManyField(Kollektion)
 
     def save(self, *args, **kwargs):
         if self.sprache in self.langs:
