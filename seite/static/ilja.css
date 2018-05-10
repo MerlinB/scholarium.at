@@ -2058,3 +2058,39 @@ td.bestellung_titel {
 	font-family: "Futura Book", Helvetica, Arial, sans-serif;
 	font-size: 20pt !important;
 }
+
+/*==================================================*/
+/*                 Bibliothek     			            */
+/*==================================================*/
+
+.bib_suche input{
+	background-color: #fff;
+	border: 1px solid #cfcfcf;
+	font-size: 12pt;
+	height: 50px;
+	margin: 5px;
+	padding: 0 14px;
+	width: 292px;
+}
+
+.bib_suche button{
+	height: 50px;
+	background: rgb(46,74,98);
+  color: #fff;
+  border: 0;
+  border-radius: 2px;
+	font-size: 14pt;
+	font-family: "Futura Book", Helvetica, Arial, sans-serif;
+	box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 1px 0px rgba(0, 0, 0, 0.24);
+}
+
+.collection_table td {
+	padding: 10px;
+	font-family: "Garamond", Georgia, Times, sans-serif;
+	display: inline-block; 
+	width: 100%; 
+	text-align: center; 
+	vertical-align: top; 
+	margin: 0; 
+	border: none;
+}

@@ -72,7 +72,7 @@ def get_collection(collection):
     for book in books:
         if 'parentItem' in book['data']:
             children.append(book)
-        else:
+        elif book['data'].get('itemType') == 'book':
             parents.append(book)
 
     for book in parents:

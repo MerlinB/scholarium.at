@@ -1,21 +1,26 @@
 from django.http import HttpResponseRedirect
 import re
 import os
-from .models import Buch, Zotero_Buch, Autor
+from .models import Buch, Zotero_Buch, Autor, Kollektion
 from django.db import transaction
 from django.db.models import Q, Value
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from pyzotero import zotero
-from .forms import SearchForm
+from .forms import SearchForm, FilterForm
 from pprint import pprint
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models.functions import Concat
 
 
 @login_required
-def liste_buecher(request):
+def collection(request, collection):
+    return liste_buecher(request, collection)
+
+
+@login_required
+def liste_buecher(request, collection=None):
     '''Gibt die Bibliotheks-Tabelle aus.
     '''
 
@@ -24,13 +29,22 @@ def liste_buecher(request):
     page = request.GET.get('seite')
     types = request.GET.getlist('type')
 
+    context = {}
+
     # Filter for search term
     if search:
         buecher = Zotero_Buch.objects.annotate(autoren__name=Concat('autoren__vorname', Value(' '), 'autoren__nachname')) \
                                      .filter(Q(bezeichnung__icontains=search) | Q(autoren__name__icontains=search))
         buecher = buecher.distinct()
     else:
-        buecher = Zotero_Buch.objects.all()
+        # Only filter for collection if no search
+        collection = Kollektion.objects.get(slug=collection) if collection else None
+        buecher = Zotero_Buch.objects.filter(kollektion=collection)
+        context['children'] = Kollektion.objects.filter(parent=collection)
+        context['collection'] = collection
+
+    context['searchform'] = SearchForm
+    context['filterform'] = FilterForm
 
     # Filter for format type
     if types:
@@ -57,12 +71,9 @@ def liste_buecher(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         buecher = paginator.page(paginator.num_pages)
+    context['paginator'] = paginator
+    context['buecher'] = buecher
 
-    context = {
-        'buecher': buecher,
-        'paginator': paginator,
-        'form': SearchForm
-    }
     return render(request, 'Bibliothek/buecher.html', context)
 
 

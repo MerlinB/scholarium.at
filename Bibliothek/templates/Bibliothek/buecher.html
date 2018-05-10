@@ -12,9 +12,33 @@
 
 {% block content %}
 <h1>Bibliothek</h1>
+<form class="bib_suche" style="text-align: center;">
+  {{ searchform.search }}
+  <button type="submit">Suche</button>
+</form>
+<div style="margin: 5em;"></div>
+{% if collection %}
+  <h2><a href="{% url 'Bibliothek:collection' collection.parent.slug %}">{{ collection.parent.bezeichnung }}/</a>{{ collection }}</h2>
+{% elif 'search' in request.GET %}
+  <h2>Suche: {{ request.GET.search }}</h2>
+{% endif %}
 <div class="container_breit">
-<form method="get">
-  {{ form }}
+  {% if children %}
+  <h3 style="text-align: center;">Kollektionen</h3>
+  <div style="column-count: 3; column-gap: 0px;margin: 2em; border: 1px solid black;">
+    <table class="collection_table">
+      {% for child in children %}
+      <tr>
+        <td><a href="{% url 'Bibliothek:collection' child.slug %}">{{ child }}</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+<div style="margin: 3em;"></div>
+{% if buecher %}
+<form>
+  {{ filterform }}
   <button type="submit">Filter</button>
 </form>
 <table class='buecher_tabelle'>
@@ -33,11 +57,11 @@
     {% for buch in buecher %}
     <tr>
       <td class="bestellung_titel">
-        <a href={{ buch.slug }}>{{ buch.bezeichnung }}</a>
+        <a href={% url 'Bibliothek:detail_buch' buch.slug %}>{{ buch.bezeichnung }}</a>
       </td>
       <td>
         {% for autor in buch.autoren.all %}
-          <a href="?search={{ autor.vorname }}%20{{ autor.nachname }}">{{ autor.vorname }} {{ autor.nachname }}</a><br>
+          <a href="{% url 'Bibliothek:liste_buecher' %}?search={{ autor.vorname }}%20{{ autor.nachname }}">{{ autor.vorname }} {{ autor.nachname }}</a><br>
         {% endfor %}
       </td>
       <td>
@@ -64,4 +88,5 @@
 </table>
 </div>
 {% include "paginationsleiste.html" %}
+{% endif %}
 {% endblock content %}
