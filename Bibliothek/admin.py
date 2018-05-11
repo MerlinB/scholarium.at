@@ -10,6 +10,10 @@ class BuchAdmin(admin.ModelAdmin):
     search_fields = ['bezeichnung']
 
 
-admin.site.register(Zotero_Buch)
+@admin.register(Zotero_Buch)
+class ZoteroBuchAdmin(admin.ModelAdmin):
+    search_fields = ['bezeichnung']
+
+
 admin.site.register(Autor)
 admin.site.register(Kollektion)

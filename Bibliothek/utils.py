@@ -48,8 +48,9 @@ def get_collections():
                 # print(child['data']['name'], 'saved.')
                 
     # Check or collections to delete
+    collection_keys = [collection['data']['key'] for collection in collections]
     for local_collection in Kollektion.objects.all():
-        if local_collection.slug not in [collection['data']['key'] for collection in collections]:
+        if local_collection.slug not in collection_keys:
             print(local_collection.bezeichnung, 'deleted.')
             local_collection.delete()
             
@@ -93,10 +94,10 @@ def get_collection(collection):
                 # local_book.sprache = langs[language] if language in langs else language
                 local_book.language = language
 
-            # Reset all children in case they where removed
-            for format in arten_liste:
-                setattr(local_book, format, None)
-                setattr(local_book, 'ob_%s' % format, False)
+            # # Reset all children in case they where removed
+            # for format in arten_liste:
+            #     setattr(local_book, format, None)
+            #     setattr(local_book, 'ob_%s' % format, False)
 
             local_book.save()
             local_book.kollektion.add(collection)
@@ -130,12 +131,13 @@ def get_collection(collection):
                     setattr(local_book, 'ob_%s' % format, True)
                     # sys.stdout.write("\r%s" % local_book.bezeichnung)
                     # sys.stdout.flush()
+                    local_book.save()
         except ObjectDoesNotExist as e:
-            logger.error('Missing parent:', child)
+            # logger.error('Missing parent:', child['data']['parentItem'])
             fails += 1
 
     print('Created: %d, Fails: %d' % (created_books, fails))
-    return parents
+    return parents, children
 
 
 def zotero_import():
@@ -143,16 +145,26 @@ def zotero_import():
 
     get_collections()
     book_list = []
+    children_list = []
+    arten_liste = Zotero_Buch.arten_liste
     for collection in Kollektion.objects.all():
-        parents = get_collection(collection)
+        parents, children = get_collection(collection)
         book_list += parents
+        children_list += children
 
-    # Check for books to delete
+    # Check for books and attachments (children) to delete
     book_keys = [book['data']['key'] for book in book_list]
+    children_keys = [child['data']['key'] for child in children_list]
     for local_book in Zotero_Buch.objects.all():
         if local_book.slug not in book_keys:
             print(local_book, 'deleted.')
             local_book.delete()
+        for format in arten_liste:
+            attachment_key = getattr(local_book, format, None)
+            if attachment_key and attachment_key not in children_keys:
+                print(local_book, 'attachment removed.')
+                setattr(local_book, format, None)
+                setattr(local_book, 'ob_%s' % format, False)
 
     end = time.time()
     print('Import of %d books done. Time:' % len(book_list), end - start)

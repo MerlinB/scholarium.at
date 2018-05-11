@@ -1,7 +1,7 @@
 {% load static produkttags %}
 {% max_anzahl_zu_liste produkt art as anzahlen %}
 {% preis produkt art as preis %}
-{% button_text produkt art as button_text %}
+{% button_text art as button_text %}
   <input class="inputbutton" type="submit" value="{{ button_text }}" disabled>
   <br />
   <p>

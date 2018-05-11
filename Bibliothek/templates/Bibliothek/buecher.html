@@ -14,9 +14,9 @@
 <h1>Bibliothek</h1>
 <form class="bib_suche" style="text-align: center;">
   {{ searchform.search }}
-  <button type="submit">Suche</button>
+  <button class="form_button" type="submit">Suche</button>
 </form>
-<div style="margin: 5em;"></div>
+<div style="margin: 2em;"></div>
 {% if collection %}
   <h2><a href="{% url 'Bibliothek:collection' collection.parent.slug %}">{{ collection.parent.bezeichnung }}/</a>{{ collection }}</h2>
 {% elif 'search' in request.GET %}
@@ -25,32 +25,32 @@
 <div class="container_breit">
   {% if children %}
   <h3 style="text-align: center;">Kollektionen</h3>
-  <div style="column-count: 3; column-gap: 0px;margin: 2em; border: 1px solid black;">
-    <table class="collection_table">
+  <div class="collection_table">
+    <ul>
       {% for child in children %}
-      <tr>
-        <td><a href="{% url 'Bibliothek:collection' child.slug %}">{{ child }}</a></td>
-      </tr>
+      <li>
+        <a href="{% url 'Bibliothek:collection' child.slug %}">{{ child }}</a>
+      </li>
       {% endfor %}
-    </table>
+    </ul>
   </div>
   {% endif %}
-<div style="margin: 3em;"></div>
-{% if buecher %}
-<form>
-  {{ filterform }}
-  <button type="submit">Filter</button>
+{% if buecher or request.GET.type %}
+<form class="bib_filter" style="display: table;">
+    <div style="display: table-cell; vertical-align: middle;">
+    {{ filterform.type }}
+    </div>
+    <div style="display: table-cell; vertical-align: middle;">
+      <button class="form_button" type="submit">Filter</button>
+    </div>
 </form>
 <table class='buecher_tabelle'>
   <thead>
     <tr>
       <th style="text-align: left;">{% anchor bezeichnung "Titel" %}</th>
       <th>{% anchor autoren "Autor" %}</th>
-      <th>{% anchor sprache 'Sprache' %}</th>
       <th>{% anchor jahr "Jahr" %}</th>
       <th>Verfügbarkeit</th>
-      <th/><th/><th>Preis</th>
-      <th/>
     </tr>
   </thead>
   <tbody>
@@ -65,23 +65,17 @@
         {% endfor %}
       </td>
       <td>
-        {% if buch.sprache %}
-          {{ buch.sprache }}
-        {% endif %}
-      </td>
-      <td>
         {% if buch.jahr %}
           {{ buch.jahr.year }}
         {% endif %}
       </td>
       <td>
+        <ul>
         {% for art in buch.arten_aktiv %}
-          {% button_text buch art %}
+          <li>{% format_text art %}</li>
         {% endfor %}
+        </ul>
       </td>
-      {% if "kaufen" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="kaufen" %}
-      {% elif "druck" in buch.arten_aktiv %}{% include "Produkte/in_den_warenkorb_inline.html" with produkt=buch art="druck" %}
-      {% else %}<td class="buecher_table_d"/>{% endif %}
     </tr>
     {% endfor %}
   </tbody>

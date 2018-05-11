@@ -1,5 +1,5 @@
 from django import template
-from Produkte.models import Kauf, Spendenstufe
+from Produkte.models import Kauf, Spendenstufe, KlasseMitProdukten
 from Grundgeruest.models import ScholariumProfile
 
 register = template.Library()
@@ -25,12 +25,12 @@ def produkt_pk(produkt, art=0):
     return produkt.pk_ausgeben(art)
 
 @register.simple_tag
-def button_text(produkt, art=0):
-    return produkt.button_text(art)
+def button_text(art=0):
+    return KlasseMitProdukten.button_text(art)
 
 @register.simple_tag
-def format_text(produkt, art=0):
-    return produkt.format_text(art)
+def format_text(art=0):
+    return KlasseMitProdukten.format_text(art)
 
 @register.simple_tag
 def anzeigemodus(produkt, art=0):

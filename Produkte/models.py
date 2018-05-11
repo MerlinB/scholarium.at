@@ -72,12 +72,12 @@ arten_attribute = {
     'teilnahme': (5, 'Auswählen', 'Vor Ort'),
     'livestream': (False, 'Livestream buchen', 'Livestream'),
     'aufzeichnung': (False, 'Aufzeichnung', 'Video/MP3'),
-    'pdf': (False, 'PDF', ''),
-    'epub': (False, 'EPUB', ''),
-    'mobi': (False, 'Kindle', ''),
-    'druck': (10, 'Druck', ''),
-    'kaufen': (1, 'Zum Kauf auswählen', ''),
-    'leihen': (1, 'Zum Verleih auswählen', ''),
+    'pdf': (False, 'PDF Download', 'PDF'),
+    'epub': (False, 'EPUB Download', 'EPUB'),
+    'mobi': (False, 'Kindle (Mobi) Download', 'Kindle'),
+    'druck': (10, 'Neu kaufen', 'Neu'),
+    'kaufen': (1, 'Gebraucht kaufen', 'Gebraucht'),
+    'leihen': (1, 'Zur Leihe auswählen', 'Verleih'),
     'buchung': (1, 'Buchen', ''),
 }
 
@@ -151,7 +151,7 @@ class KlasseMitProdukten(Grundklasse, metaclass=PreiseMetaklasse):
         else:
             return self.finde_preis(art)
 
-    def button_text(self, art=0):
+    def button_text(art=0):
         """ Gibt Beschriftung für Button zum in-den-Warenkorb-Legen aus """
         return arten_attribute[art][1]
 
@@ -175,8 +175,8 @@ class KlasseMitProdukten(Grundklasse, metaclass=PreiseMetaklasse):
                 return True
         return False
 
-    def format_text(self, art=0):
-        """Gibt für Veranstaltungen den Text des jeweiligen Formats aus"""
+    def format_text(art=0):
+        """Gibt den Text des jeweiligen Formats aus"""
         return arten_attribute[art][2]
 
     def kaeufe_finden(self, qs=False, art=0):

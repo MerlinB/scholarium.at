@@ -2063,18 +2063,39 @@ td.bestellung_titel {
 /*                 Bibliothek     			            */
 /*==================================================*/
 
-.bib_suche input{
+.bib_suche input {
 	background-color: #fff;
 	border: 1px solid #cfcfcf;
 	font-size: 12pt;
-	height: 50px;
+	height: 35px;
 	margin: 5px;
 	padding: 0 14px;
 	width: 292px;
 }
 
-.bib_suche button{
-	height: 50px;
+.bib_filter {
+	height: 2em;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 2em;
+}
+
+.bib_filter li {
+	vertical-align: middle;
+	float: left;
+	list-style: none;
+	height: 100%;
+	margin: 5px;
+}
+
+.bib_filter button {
+	margin-left: 2em;
+	margin-right: 7px;
+	height: auto;
+}
+
+.form_button{
+	height: 35px;
 	background: rgb(46,74,98);
   color: #fff;
   border: 0;
@@ -2084,13 +2105,27 @@ td.bestellung_titel {
 	box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.12), 0px 0px 1px 0px rgba(0, 0, 0, 0.24);
 }
 
-.collection_table td {
+
+.collection_table {
+	column-count: 3;
+	column-fill: balance;
+	column-gap: 0px;
+	margin: 2em;
+	padding: 1em;
+	border: 1px solid black;
+	column-rule-width: 0px;
+}
+
+.collection_table li {
 	padding: 10px;
 	font-family: "Garamond", Georgia, Times, sans-serif;
 	display: inline-block; 
 	width: 100%; 
 	text-align: center; 
 	vertical-align: top; 
-	margin: 0; 
+	margin: 0;
+	padding-left: 0;
+	padding-right: 0;
+	font-size: 12pt;
 	border: none;
 }

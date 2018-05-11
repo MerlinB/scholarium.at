@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 import re
 import os
+from django.contrib import messages
 from .models import Buch, Zotero_Buch, Autor, Kollektion
 from django.db import transaction
 from django.db.models import Q, Value
@@ -19,9 +20,10 @@ def collection(request, collection):
     return liste_buecher(request, collection)
 
 
+# TODO: beschränkter view für Gäste
 @login_required
 def liste_buecher(request, collection=None):
-    '''Gibt die Bibliotheks-Tabelle aus.
+    '''Gibt die Bibliothek aus.
     '''
 
     sort = request.GET.get('sort')
@@ -48,11 +50,16 @@ def liste_buecher(request, collection=None):
 
     # Filter for format type
     if types:
-        types_dict = {}
+        q_objects = Q()
         for type in types:
+            types_dict = {}
             types_dict['ob_%s' % type] = True
             types_dict['%s__isnull' % type] = False
-        buecher = buecher.filter(**types_dict)
+            q_objects |= Q(**types_dict)
+        buecher = buecher.filter(q_objects)
+        buecher = buecher.distinct()
+        if not buecher:
+            messages.info(request, 'Kein Buch gefunden, dass den Filterkriterien entspricht.')
 
     # Table sort
     if sort:

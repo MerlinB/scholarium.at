@@ -2,6 +2,7 @@ from django.db import models
 from Produkte.models import KlasseMitProdukten
 from django.urls import reverse
 from seite.models import Grundklasse
+from django.urls.exceptions import NoReverseMatch
 
 
 class Kollektion(Grundklasse):
@@ -97,7 +98,10 @@ class Buch(KlasseMitProdukten):
     alte_nr = models.SmallIntegerField(null=True, editable=False)
 
     def get_absolute_url(self):
-        return reverse('Bibliothek:detail_buch', kwargs={'slug': self.slug})
+        try:
+            return reverse('Bibliothek:detail_buch_alt', kwargs={'slug': self.slug})
+        except NoReverseMatch:
+            return '#'
 
     def preis_ausgeben(self, art):
         if art == 'leihen':
