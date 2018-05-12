@@ -11,6 +11,7 @@ from django.shortcuts import render
 from pyzotero import zotero
 from .forms import SearchForm, FilterForm
 from pprint import pprint
+from Produkte.models import arten_attribute
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models.functions import Concat
 
@@ -53,8 +54,11 @@ def liste_buecher(request, collection=None):
         q_objects = Q()
         for type in types:
             types_dict = {}
-            types_dict['ob_%s' % type] = True
-            types_dict['%s__isnull' % type] = False
+            if arten_attribute[type][0]:
+                types_dict['anzahl_%s__gt' % type] = 0
+            else:
+                types_dict['ob_%s' % type] = True
+                types_dict['%s__isnull' % type] = False
             q_objects |= Q(**types_dict)
         buecher = buecher.filter(q_objects)
         buecher = buecher.distinct()
@@ -88,7 +92,8 @@ def liste_buecher(request, collection=None):
 def detail_buch(request, id):
     zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
     buch = zot.item(id)
-    return render(request, 'Bibliothek/detail_buch.html', {'buch': buch})
+    local_book = Zotero_Buch.objects.get(slug=id)
+    return render(request, 'Bibliothek/detail_buch.html', {'buch': buch, 'local_book': local_book})
 
 
 attributnamen = {

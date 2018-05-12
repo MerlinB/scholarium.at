@@ -2,7 +2,9 @@ from django.db import models
 from Produkte.models import KlasseMitProdukten
 from django.urls import reverse
 from seite.models import Grundklasse
+from Grundgeruest.models import ScholariumProfile
 from django.urls.exceptions import NoReverseMatch
+from datetime import date, timedelta
 
 
 class Kollektion(Grundklasse):
@@ -34,10 +36,56 @@ class Zotero_Buch(KlasseMitProdukten):
     epub = models.CharField(max_length=50, blank=True, null=True)
     kollektion = models.ManyToManyField(Kollektion)
 
+    def get_laufend(self):
+        return [l for l in self.leihe_set.all() if l.get_ablauf() >= date.today()]
+        
+    def anzahl_leihbar(self):
+        return self.anzahl_leihen - len(self.get_laufend())
+
     def save(self, *args, **kwargs):
         if self.sprache in self.langs:
             self.sprache = self.langs[self.sprache]
         super().save(*args, **kwargs)
+
+    def preis_ausgeben(self, art):
+        if art == 'leihen':
+            return self.finde_preis(art) or 13
+        elif art == 'kaufen':
+            return self.finde_preis(art) or 37
+        elif art in ['pdf', 'epub', 'mobi']:
+            return self.finde_preis(art) or 5
+        elif art == 'druck':
+            return self.finde_preis(art) or 20
+
+    def anzeigemodus(self, art):
+        if art in ['pdf', 'epub', 'mobi']:
+            if getattr(self, 'ob_%s' % art) and bool(getattr(self, art)):
+                return 'inline'
+            else:
+                return 'verbergen'
+        elif art == 'leihen':
+            if self.anzahl_leihbar() <= 0:
+                return 'verbergen'
+            else:
+                return 'inline'
+        else:
+            return super(Zotero_Buch, self).anzeigemodus(art)
+
+    class Meta:
+        verbose_name_plural = 'Zotero Bücher'
+        verbose_name = 'Buch'
+        ordering = ['-zeit_erstellt']
+
+
+class Leihe(models.Model):
+    buch = models.ForeignKey(Zotero_Buch, on_delete=models.PROTECT)  # Protected für Fall, dass nur verschoben etc...
+    nutzer = models.ForeignKey(ScholariumProfile, on_delete=models.CASCADE)
+    dauer = models.IntegerField(default=30)
+    datum = models.DateField(default=date.today())
+
+    def get_ablauf(self):
+        '''Gibt Ablaufdatum der Leihe zurück.'''
+        return self.datum + timedelta(days=self.dauer)
 
 
 class Altes_Buch(KlasseMitProdukten):

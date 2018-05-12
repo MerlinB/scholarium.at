@@ -8,6 +8,7 @@ import sys
 import time
 from pprint import pprint
 import logging
+from django.db.models import ProtectedError
 
 
 def collections(collections):  # TODO: noch relevant?
@@ -32,13 +33,13 @@ def get_collections():
     '''
     print('retrieving collections...')
     zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
-    collections = zot.collections()
+    collections = [collection for collection in zot.collections() if collection['data']['name'][0] != '_']
     
     def save_collections(parent_key, items):
         '''Sorts parent and childcollections in a dictionary'''
         children = [item for item in items if item['data']['parentCollection'] == parent_key]
         for child in children:
-            local_collection, created = Kollektion.objects.get_or_create(
+            local_collection, created = Kollektion.objects.update_or_create(
                 slug=child['data']['key'],
                 defaults={'bezeichnung': child['data']['name']})
             if parent_key:
@@ -79,7 +80,7 @@ def get_collection(collection):
     for book in parents:
         try:
             title = book['data'].get('title') or book['data']['subject']  # Sometimes title is missing
-            local_book, created = Zotero_Buch.objects.get_or_create(
+            local_book, created = Zotero_Buch.objects.update_or_create(
                 slug=book['data']['key'],
                 defaults={'bezeichnung': title})
             if 'date' in book['data']:
@@ -93,6 +94,10 @@ def get_collection(collection):
                 language = book['data']['language']
                 # local_book.sprache = langs[language] if language in langs else language
                 local_book.language = language
+
+            for tag in book['data']['tags']:
+                if tag['tag'] in ['Hoppe', 'Baader', 'schuetz', 'schütz', 'Schütz']:
+                    local_book.anzahl_leihen = 1
 
             # # Reset all children in case they where removed
             # for format in arten_liste:
@@ -142,6 +147,7 @@ def get_collection(collection):
 
 def zotero_import():
     start = time.time()
+    logger = logging.getLogger(__name__)
 
     get_collections()
     book_list = []
@@ -158,7 +164,10 @@ def zotero_import():
     for local_book in Zotero_Buch.objects.all():
         if local_book.slug not in book_keys:
             print(local_book, 'deleted.')
-            local_book.delete()
+            try:
+                local_book.delete()
+            except ProtectedError:
+                logger.exception('Versuch, beschütztes Buch zu löschen! Bitte erst Leihen löschen.')
         for format in arten_liste:
             attachment_key = getattr(local_book, format, None)
             if attachment_key and attachment_key not in children_keys:

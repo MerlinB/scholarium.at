@@ -19,5 +19,17 @@
       {% if buch.data.url %}<li><a href="{{ buch.data.url }}">Link</a> </li>{% endif %}
     </ul>
     {% if buch.data.abstractNote %}<p>{{ buch.data.abstractNote }}</p>{% endif %}
+    {% if local_book.arten_aktiv|length > 1 %}
+      <table class="buecher_tabelle buecher_korb sinfo" style="width: 30%; margin: auto; border: 0;">
+        {% for kaufart in local_book.arten_aktiv %}
+          <tr>
+            {% anzeigemodus local_book kaufart as modus %}
+            {% include "Produkte/in_den_warenkorb_"|add:modus|add:".html" with produkt=local_book art=kaufart %}
+          </tr>
+        {% endfor %}
+      </table>
+    {% elif local_book.arten_aktiv|length == 1 %}
+      {% include "Veranstaltungen/buchung_veranstaltung_unten.html" with veranstaltung=local_book %}
+    {% endif %}
   </div>
 {% endblock content %}

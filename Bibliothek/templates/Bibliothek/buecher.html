@@ -40,6 +40,7 @@
     <div style="display: table-cell; vertical-align: middle;">
     {{ filterform.type }}
     </div>
+    <input type="hidden" name="search" value="{{ request.GET.search }}"/>
     <div style="display: table-cell; vertical-align: middle;">
       <button class="form_button" type="submit">Filter</button>
     </div>
