@@ -1,5 +1,5 @@
 from django.db import models
-from Produkte.models import KlasseMitProdukten
+from Produkte.models import KlasseMitProdukten, Kauf
 from django.urls import reverse
 from seite.models import Grundklasse
 from Grundgeruest.models import ScholariumProfile
@@ -35,6 +35,12 @@ class Zotero_Buch(KlasseMitProdukten):
     mobi = models.CharField(max_length=50, blank=True, null=True)
     epub = models.CharField(max_length=50, blank=True, null=True)
     kollektion = models.ManyToManyField(Kollektion)
+
+    def get_absolute_url(self):
+        try:
+            return reverse('Bibliothek:detail_buch', kwargs={'id': self.slug})
+        except NoReverseMatch:
+            return '#'
 
     def get_laufend(self):
         return [l for l in self.leihe_set.all() if l.get_ablauf() >= date.today()]
@@ -80,8 +86,9 @@ class Zotero_Buch(KlasseMitProdukten):
 class Leihe(models.Model):
     buch = models.ForeignKey(Zotero_Buch, on_delete=models.PROTECT)  # Protected für Fall, dass nur verschoben etc...
     nutzer = models.ForeignKey(ScholariumProfile, on_delete=models.CASCADE)
+    kauf = models.OneToOneField(Kauf, null=True, blank=True, on_delete=models.SET_NULL)
     dauer = models.IntegerField(default=30)
-    datum = models.DateField(default=date.today())
+    datum = models.DateField(default=date.today)
 
     def get_ablauf(self):
         '''Gibt Ablaufdatum der Leihe zurück.'''

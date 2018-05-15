@@ -254,6 +254,9 @@ class ScholariumProfile(UserenaBaseProfile):
 %s %s
 %s""" % (self.user.get_full_name(), self.strasse, self.plz, self.ort, self.land.name if self.land else '')
 
+    def get_leihe_aktiv(self):
+        return [leihe for leihe in self.leihe_set.all() if leihe.get_ablauf >= date.today()]
+
     def __str__(self):
         return 'Profil von %s (%s)' % (self.user.email, self.user.get_full_name())
 

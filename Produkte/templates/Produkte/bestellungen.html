@@ -16,6 +16,13 @@
     <h2>Keine Veranstaltungen gebucht</h2>
   </div>
   {% endif %}
+  
+  {% if kaeufe.leihgaben %}
+  <div class="separator">
+    <h2>Ihre geliehenen Bücher</h2>
+  </div>
+  {% include "Produkte/bestellungen_leihgaben.html" with leihgaben=kaeufe.leihgaben %}
+  {% endif %}
 
   {% if kaeufe.digital %}{% with medien=kaeufe.digital %}
   <div class="separator">

@@ -153,6 +153,25 @@ Mailadresse für eventuelle Rückfragen:
             fail_silently=False,
         )
 
+    @classmethod
+    def buch_gebucht(cls, request):
+        from Produkte.views import Warenkorb
+        from Produkte.models import arten_attribute
+
+        items = ""
+        for pk, ware in Warenkorb(request).items.items():
+            art = Kauf.tupel_aus_pk(pk)[2]
+            if art in ['leihen', 'druck', 'kauf']:
+                items += "%s x %s als %s\n" % (ware.quantity, Kauf.obj_aus_pk(pk), arten_attribute[art][2])
+        text = "Bestellungsinfo\n\n%s hat gebucht:\n %s" % (request.user, items)
+        send_mail(
+            subject='[website] Bestellung Buch eingegangen',
+            message=text,
+            from_email='iljasseite@googlemail.com',
+            recipient_list=['ilja1988@googlemail.com', cls.mailadresse],
+            fail_silently=False,
+        )
+
 
 def erstelle_liste_menue(user=None):
     if user is None or not user.is_authenticated() or user.my_profile.get_Status()[0] == 0:

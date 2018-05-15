@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Buch, Zotero_Buch, Autor, Kollektion
+from .models import Buch, Zotero_Buch, Autor, Kollektion, Leihe
 
 
 @admin.register(Buch)
@@ -13,6 +13,12 @@ class BuchAdmin(admin.ModelAdmin):
 @admin.register(Zotero_Buch)
 class ZoteroBuchAdmin(admin.ModelAdmin):
     search_fields = ['bezeichnung']
+
+
+@admin.register(Leihe)
+class LeihAdmin(admin.ModelAdmin):
+    list_display = ['nutzer', 'buch', 'datum', 'get_ablauf']
+    list_filter = ['datum']
 
 
 admin.site.register(Autor)

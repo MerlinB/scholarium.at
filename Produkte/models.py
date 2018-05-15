@@ -305,6 +305,8 @@ class Kauf(models.Model):
             menge = int(getattr(objekt, 'anzahl_'+art))
             if menge < ware.quantity:
                 return None  # Kaufvorgang abbrechen wenn Menge nicht reicht
+            elif art == 'leihen':  # Verfügbarkeit bei Leihgaben wird dynamisch berechnet.
+                leihe = objekt.leihe_set.create(buch=objekt, nutzer=nutzer)
             else:
                 menge += - ware.quantity
                 setattr(objekt, 'anzahl_'+art, menge)
@@ -325,6 +327,9 @@ class Kauf(models.Model):
                 menge=ware.quantity,
                 guthaben_davor=guthaben)
 
+        if art == 'leihen':
+            leihe.kauf = kauf
+            leihe.save()
         nutzer.guthaben = guthaben - ware.total
         nutzer.save()
         return kauf

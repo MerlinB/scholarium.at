@@ -2,16 +2,20 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
+from django.conf import settings
 from django.contrib import messages
 from easycart.cart import CartException
 from django.views.generic import View
-# Create your views here.
-
+from pyzotero import zotero
+from slugify import slugify
+from pyzotero.zotero_errors import ResourceNotFound
 from easycart import BaseCart, BaseItem
 from Grundgeruest.views import erstelle_liste_menue, Nachricht
 from .models import Kauf, arten_attribute
 from Veranstaltungen.models import Veranstaltung, Studiumdings
+from Bibliothek.models import Zotero_Buch
+from datetime import date
 
 """
 Integration des Pakets easycart - keine Modelle, über session Variablen
@@ -279,8 +283,12 @@ def bestellungen(request):
             # wär nett das reinzunehmen, aber dafür download-button flexibler anzeigen:
             #        elif kauf.art_ausgeben() == 'livestream': # bleibt nur vergangen
             #            kaeufe['digital'].append(kauf)
+        elif kauf.art_ausgeben() == 'leihen':
+            pass
         else:
             kaeufe['rest'].append(kauf)
+            
+        kaeufe['leihgaben'] = [leihe for leihe in nutzer.leihe_set.all() if leihe.get_ablauf() >= date.today()]
     return render(request,
                   'Produkte/bestellungen.html',
                   {'kaeufe': kaeufe, 'liste_menue': liste_menue})
@@ -308,6 +316,8 @@ def kaufen(request):
             ob_studien = True
         if isinstance(objekt, Veranstaltung) and kauf.art_ausgeben() == 'teilnahme':
             ob_teilnahmen = True
+        if isinstance(objekt, Zotero_Buch) and kauf.art_ausgeben() in ['leihen', 'druck', 'kaufen']:
+            Nachricht.buch_gebucht(request)
 
     if ob_studien:
         Nachricht.studiumdings_gebucht(request)
@@ -330,14 +340,26 @@ def medien_runterladen(request):
 
     obj, art = kauf.objekt_ausgeben(mit_art=True)
     filefield = obj.datei if art == 'aufzeichnung' else getattr(obj, art)
-    with open(filefield.path, 'rb') as datei:
-        medium = datei.read()
 
-    name, ext = os.path.splitext(filefield.name)
-    print(ext)
+    if isinstance(obj, Zotero_Buch):
+        zot = zotero.Zotero(settings.ZOTERO_USER_ID, settings.ZOTERO_LIBRARY_TYPE, settings.ZOTERO_API_KEY)
+        print(getattr(obj, art))
+        try:
+            medium = zot.file(getattr(obj, art))
+        except ResourceNotFound:
+            raise Http404()
+        
+        response = HttpResponse(medium, content_type='application/force-download')
+        response['Content-Disposition'] = ('attachment; filename=%s.%s' % (slugify(obj.bezeichnung), art))
 
-    response = HttpResponse(medium, content_type='application/force-download')
-    response['Content-Disposition'] = ('attachment; filename=' + obj.slug + ext)
+    else:
+        with open(filefield.path, 'rb') as datei:
+            medium = datei.read()
+
+        name, ext = os.path.splitext(filefield.name)
+
+        response = HttpResponse(medium, content_type='application/force-download')
+        response['Content-Disposition'] = ('attachment; filename=' + obj.slug + ext)
 
     return response
 

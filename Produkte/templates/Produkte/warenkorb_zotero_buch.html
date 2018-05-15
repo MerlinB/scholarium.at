@@ -3,7 +3,12 @@
 {% with buch=obj %}
   {% art_aus_pk pk as art %}
   <div class="warenkorb_veranstaltung">
-    <span>{% for autor in buch.autoren.all %}{{ autor }}{% endfor %}</span>
+    <span>
+      {% for autor in buch.autoren.all %}
+        {% if not forloop.first %}, {% endif %}
+        {{ autor }}
+      {% endfor %}
+    </span>
     <span>
       <a href="{% url 'Bibliothek:detail_buch' buch.slug %}">{{ buch.bezeichnung }}</a>
     </span>

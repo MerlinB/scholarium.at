@@ -240,6 +240,7 @@ HOSTNAME = 'https://scholarium.at'
 CRON_CLASSES = [
     # 'seite.cron.cron_t2sql',
     'seite.cron.cron_publish',
+    'seite.cron.cron_zotero'
 ]
 
 # Release period in days

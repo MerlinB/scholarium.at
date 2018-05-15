@@ -1,0 +1,27 @@
+{% load static produkttags %}
+{% load humanize %}
+
+<div class="container_breit" style="width: 70%; padding: 50px 15%;">
+  <table class="bestellung_item">
+    <tr>
+      <th style="text-align: left;">Titel</th>
+      <th>Autoren</th>
+      <th>Ablaufdatum</th>
+      <th>Gebucht</th>
+    </tr>
+    {% for leihgabe in leihgaben %}
+      <tr>
+        <td class="bestellung_titel">
+          <a href="{{ leihgabe.buch.get_absolute_url }}">{{ leihgabe.buch|safe }}</a>
+        </td>
+        <td><ul>
+          {% for autor in leihgabe.buch.autoren.all %}
+            <li style="font-family: 'Garamond', Georgia, Times, sans-serif; font-size: 12pt;">{{ autor }}</li>
+          {% endfor %}
+        </ul></td>
+        <td>{{ leihgabe.get_ablauf }}</td>
+        <td>{{ leihgabe.datum }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>

@@ -176,4 +176,4 @@ def zotero_import():
                 setattr(local_book, 'ob_%s' % format, False)
 
     end = time.time()
-    print('Import of %d books done. Time:' % len(book_list), end - start)
+    return 'Import of %d books done. Time: %s' % (len(book_list), end - start)
