@@ -1,6 +1,6 @@
 from django_cron import CronJobBase, Schedule
 from Workflow.utils import trelloToSQL, publish
-from Bibliothek.utils import zotero_import
+from Bibliothek.utils import zotero_import, leihkosten_abziehen
 
 '''
 Crontab Configuration:
@@ -36,3 +36,13 @@ class cron_zotero(CronJobBase):
 
     def do(self):
         return zotero_import()
+
+
+class cron_leihen(CronJobBase):
+    RUN_AT_TIMES = ['04:00']
+    
+    schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    code = 'Leihkosten abziehen'
+    
+    def do(self):
+        return leihkosten_abziehen()

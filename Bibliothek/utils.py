@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Zotero_Buch, Autor, Kollektion
+from .models import Zotero_Buch, Autor, Kollektion, Leihe
 from pyzotero import zotero
-from datetime import date
+from datetime import date, timedelta
 import re
 import sys
 import time
@@ -177,3 +177,15 @@ def zotero_import():
 
     end = time.time()
     return 'Import of %d books done. Time: %s' % (len(book_list), end - start)
+
+
+def leihkosten_abziehen():
+    log = ''
+    for leihe in Leihe.objects.filter(versandt__isnull=False, rueckkehr__isnull=True):
+        von = leihe.berechnet if leihe.berechnet else leihe.versandt + timedelta(days=30)
+        if (date.today() - von) >= timedelta(days=7):
+            leihe.nutzer.guthaben -= 2
+            leihe.berechnet = date.today()
+            log += '%s berechnet. \n' % leihe.__str__()
+
+    return log

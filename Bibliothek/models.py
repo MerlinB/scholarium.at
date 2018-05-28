@@ -43,7 +43,7 @@ class Zotero_Buch(KlasseMitProdukten):
             return '#'
 
     def get_laufend(self):
-        return self.leihe_set.filter(versandt__isnull=False, rueckkehr__isnull=True)
+        return self.leihe_set.filter(rueckkehr__isnull=True)
         
     def anzahl_leihbar(self):
         return self.anzahl_leihen - len(self.get_laufend())
@@ -91,6 +91,10 @@ class Leihe(models.Model):
     kauf = models.OneToOneField(Kauf, null=True, blank=True, on_delete=models.SET_NULL)
     versandt = models.DateField(blank=True, null=True)
     rueckkehr = models.DateField(blank=True, null=True)
+    berechnet = models.DateField(blank=True, null=True)
+    
+    def __str__(self):
+        return 'Leihe %s: %s' % (self.nutzer.__str__(), self.buch.bezeichnung)
 
 
 class Altes_Buch(KlasseMitProdukten):

@@ -12,7 +12,13 @@ class BuchAdmin(admin.ModelAdmin):
 
 @admin.register(Zotero_Buch)
 class ZoteroBuchAdmin(admin.ModelAdmin):
+    raw_id_fields = ['autoren']
     search_fields = ['bezeichnung']
+    list_display = ['bezeichnung', 'get_authors']
+    list_filter = ['jahr']
+
+    def get_authors(self, obj):
+        return ", ".join([autor.__str__() for autor in obj.autoren.all()])
 
 
 @admin.register(Leihe)

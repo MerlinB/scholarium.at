@@ -258,7 +258,7 @@ class ScholariumProfile(UserenaBaseProfile):
         return [leihe for leihe in self.leihe_set.all() if leihe.get_ablauf >= date.today()]
 
     def __str__(self):
-        return 'Profil von %s (%s)' % (self.user.email, self.user.get_full_name())
+        return '%s (%s)' % (self.user.get_full_name(), self.user.email)
 
     class Meta():
         verbose_name = 'Nutzerprofil'

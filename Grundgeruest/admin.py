@@ -31,8 +31,9 @@ class StufenPlusUnterstuetzerListFilter(admin.SimpleListFilter):  # Nicht in Ben
 
 
 class ProfileAdmin(admin.ModelAdmin):
+    raw_id_fields = ['user']
     list_filter = ['land']
-    search_fields = ['user__email', 'user']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
     list_display = ['anrede', 'user', 'guthaben', 'get_Status', 'get_aktiv', 'get_ablauf']
 
 
