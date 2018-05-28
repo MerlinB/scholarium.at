@@ -6,8 +6,7 @@
     <tr>
       <th style="text-align: left;">Titel</th>
       <th>Autoren</th>
-      <th>Ablaufdatum</th>
-      <th>Gebucht</th>
+      <th>Status</th>
     </tr>
     {% for leihgabe in leihgaben %}
       <tr>
@@ -19,8 +18,13 @@
             <li style="font-family: 'Garamond', Georgia, Times, sans-serif; font-size: 12pt;">{{ autor }}</li>
           {% endfor %}
         </ul></td>
-        <td>{{ leihgabe.get_ablauf }}</td>
-        <td>{{ leihgabe.datum }}</td>
+        <td>
+          {% if leihgabe.versandt %}
+            Versandt: {{ leihgabe.versandt }}
+          {% else %}
+            In Vorbereitung
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </table>

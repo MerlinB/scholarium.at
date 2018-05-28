@@ -17,8 +17,8 @@ class ZoteroBuchAdmin(admin.ModelAdmin):
 
 @admin.register(Leihe)
 class LeihAdmin(admin.ModelAdmin):
-    list_display = ['nutzer', 'buch', 'datum', 'get_ablauf']
-    list_filter = ['datum']
+    raw_id_fields = ['buch', 'nutzer', 'kauf']
+    list_display = ['nutzer', 'buch', 'versandt', 'rueckkehr']
 
 
 admin.site.register(Autor)

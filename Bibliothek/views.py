@@ -48,22 +48,28 @@ def liste_buecher(request, collection=None):
 
     context['searchform'] = SearchForm
     context['filterform'] = FilterForm
+    filtered = True if types else False
+
+    # Only show books available in any format
+    types = types or [art for art in Zotero_Buch.arten_liste]
 
     # Filter for format type
-    if types:
-        q_objects = Q()
-        for type in types:
-            types_dict = {}
-            if arten_attribute[type][0]:
-                types_dict['anzahl_%s__gt' % type] = 0
-            else:
-                types_dict['ob_%s' % type] = True
-                types_dict['%s__isnull' % type] = False
-            q_objects |= Q(**types_dict)
-        buecher = buecher.filter(q_objects)
-        buecher = buecher.distinct()
-        if not buecher:
-            messages.info(request, 'Kein Buch gefunden, dass den Filterkriterien entspricht.')
+    q_objects = Q()
+    for type in types:
+        types_dict = {}
+        if arten_attribute[type][0]:
+            types_dict['anzahl_%s__gt' % type] = 0
+            if type == 'leihen':
+                types_dict['preis_druck__gt'] = 0
+        else:
+            types_dict['ob_%s' % type] = True
+            types_dict['%s__isnull' % type] = False
+        q_objects |= Q(**types_dict)
+    buecher = buecher.filter(q_objects)
+    buecher = buecher.distinct()
+
+    if filtered and not buecher:
+        messages.info(request, 'Kein Buch gefunden, dass den Filterkriterien entspricht.')
 
     # Table sort
     if sort:

@@ -12,7 +12,12 @@
     <span>
       <a href="{% url 'Bibliothek:detail_buch' buch.slug %}">{{ buch.bezeichnung }}</a>
     </span>
-    <span>{% format_text art %}</span>
+    <span>
+      {% format_text art %}
+      {% if art == 'leihen' %}
+        für 1 Monat. Jede weitere Woche: 2 Guthaben
+      {% endif %}
+    </span>
     <form action="{% url 'Produkte:cart-remove' %}" method="post">
     	{% csrf_token %}
       <input type="hidden" name="pk" value={{ pk }}>

@@ -43,7 +43,7 @@ class Zotero_Buch(KlasseMitProdukten):
             return '#'
 
     def get_laufend(self):
-        return [l for l in self.leihe_set.all() if l.get_ablauf() >= date.today()]
+        return self.leihe_set.filter(versandt__isnull=False, rueckkehr__isnull=True)
         
     def anzahl_leihbar(self):
         return self.anzahl_leihen - len(self.get_laufend())
@@ -55,7 +55,7 @@ class Zotero_Buch(KlasseMitProdukten):
 
     def preis_ausgeben(self, art):
         if art == 'leihen':
-            return self.finde_preis(art) or 13
+            return self.finde_preis(art) or 5
         elif art == 'kaufen':
             return self.finde_preis(art) or 37
         elif art in ['pdf', 'epub', 'mobi']:
@@ -70,8 +70,10 @@ class Zotero_Buch(KlasseMitProdukten):
             else:
                 return 'verbergen'
         elif art == 'leihen':
-            if self.anzahl_leihbar() <= 0:
+            if not (self.anzahl_leihen and self.preis_druck):
                 return 'verbergen'
+            elif self.anzahl_leihbar() <= 0:
+                return 'ausgegraut'
             else:
                 return 'inline'
         else:
@@ -87,12 +89,8 @@ class Leihe(models.Model):
     buch = models.ForeignKey(Zotero_Buch, on_delete=models.PROTECT)  # Protected für Fall, dass nur verschoben etc...
     nutzer = models.ForeignKey(ScholariumProfile, on_delete=models.CASCADE)
     kauf = models.OneToOneField(Kauf, null=True, blank=True, on_delete=models.SET_NULL)
-    dauer = models.IntegerField(default=30)
-    datum = models.DateField(default=date.today)
-
-    def get_ablauf(self):
-        '''Gibt Ablaufdatum der Leihe zurück.'''
-        return self.datum + timedelta(days=self.dauer)
+    versandt = models.DateField(blank=True, null=True)
+    rueckkehr = models.DateField(blank=True, null=True)
 
 
 class Altes_Buch(KlasseMitProdukten):

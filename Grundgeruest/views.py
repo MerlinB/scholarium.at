@@ -76,11 +76,14 @@ Betrag: %s, Zahlungsart: %s, aktuelle Zeit: %s
 
     @classmethod
     def bestellung_versenden(cls, request):
+        from Produkte.models import arten_attribute
+
         nutzer = request.user
         from Produkte.views import Warenkorb
         text_warenkorb = ''
         for pk, ware in Warenkorb(request).items.items():
-            text_warenkorb += "%s x %s\n" % (ware.quantity, Kauf.obj_aus_pk(pk))
+            art = Kauf.tupel_aus_pk(pk)[2]
+            text_warenkorb += "%s x %s als %s\n" % (ware.quantity, Kauf.obj_aus_pk(pk), arten_attribute[art][2])
         text = '''Hallo Georg!
 
 Ein Nutzer hat Waren zum Versand bestellt.
@@ -147,25 +150,6 @@ Mailadresse für eventuelle Rückfragen:
 ''' % (text_warenkorb, request.user.email)
         send_mail(
             subject='[website] Bestellung Teilnahmen eingegangen',
-            message=text,
-            from_email='iljasseite@googlemail.com',
-            recipient_list=['ilja1988@googlemail.com', cls.mailadresse],
-            fail_silently=False,
-        )
-
-    @classmethod
-    def buch_gebucht(cls, request):
-        from Produkte.views import Warenkorb
-        from Produkte.models import arten_attribute
-
-        items = ""
-        for pk, ware in Warenkorb(request).items.items():
-            art = Kauf.tupel_aus_pk(pk)[2]
-            if art in ['leihen', 'druck', 'kauf']:
-                items += "%s x %s als %s\n" % (ware.quantity, Kauf.obj_aus_pk(pk), arten_attribute[art][2])
-        text = "Bestellungsinfo\n\n%s hat gebucht:\n %s" % (request.user, items)
-        send_mail(
-            subject='[website] Bestellung Buch eingegangen',
             message=text,
             from_email='iljasseite@googlemail.com',
             recipient_list=['ilja1988@googlemail.com', cls.mailadresse],

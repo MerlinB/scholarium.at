@@ -288,7 +288,7 @@ def bestellungen(request):
         else:
             kaeufe['rest'].append(kauf)
             
-        kaeufe['leihgaben'] = [leihe for leihe in nutzer.leihe_set.all() if leihe.get_ablauf() >= date.today()]
+        kaeufe['leihgaben'] = nutzer.leihe_set.filter(rueckkehr__isnull=True)
     return render(request,
                   'Produkte/bestellungen.html',
                   {'kaeufe': kaeufe, 'liste_menue': liste_menue})
@@ -316,8 +316,6 @@ def kaufen(request):
             ob_studien = True
         if isinstance(objekt, Veranstaltung) and kauf.art_ausgeben() == 'teilnahme':
             ob_teilnahmen = True
-        if isinstance(objekt, Zotero_Buch) and kauf.art_ausgeben() in ['leihen', 'druck', 'kaufen']:
-            Nachricht.buch_gebucht(request)
 
     if ob_studien:
         Nachricht.studiumdings_gebucht(request)

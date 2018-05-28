@@ -2,8 +2,17 @@
 {% max_anzahl_zu_liste produkt art as anzahlen %}
 {% preis produkt art as preis %}
 {% button_text art as button_text %}
-  <input class="inputbutton" type="submit" value="{{ button_text }}" disabled>
-  <br />
-  <p>
-      Die Plätze vor Ort sind bereits ausgebucht.
+<td/><td>
+  <input class="inputbutton" type="submit" value="{{ button_text }}" disabled/>
+</td>
+<br />
+
+<td colspan="2">
+  <p style="width: 300px;">
+  {% if art == "leihen" %}
+    Dieses Buch ist aktuell verliehen.
+  {% else %}
+    Die Plätze vor Ort sind bereits ausgebucht.
+  {% endif %}
   </p>
+</td>

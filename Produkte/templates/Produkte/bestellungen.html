@@ -11,10 +11,7 @@
     <h2>Ihre kommenden Veranstaltungen</h2>
   </div>
   {% include "Produkte/bestellungen_item.html" with items=teilnahmen menge=True datum=True bild=False stream=True %}
-  {% endwith %}{% else %}
-  <div class="separator" style="margin-bottom: 100px">
-    <h2>Keine Veranstaltungen gebucht</h2>
-  </div>
+  {% endwith %}
   {% endif %}
   
   {% if kaeufe.leihgaben %}
@@ -28,7 +25,7 @@
   <div class="separator">
     <h2>Ihre elektronischen Medien</h2>
   </div>
-  {% include "Produkte/bestellungen_item.html" with items=medien dl=True bild=True %}
+  {% include "Produkte/bestellungen_item.html" with items=medien dl=True bild=False %}
   {% endwith %}{% else %}
   <div class="separator" style="margin-bottom: 100px">
     <h2>Keine elektronischen Bücher oder Aufzeichnungen</h2>
@@ -37,9 +34,9 @@
 
   {% if kaeufe.rest %}{% with rest=kaeufe.rest %}
   <div class="separator">
-    <h2>Ihre restlichen Käufe:</h2>
+    <h2>Ihre vergangenen Käufe:</h2>
   </div>>
-  {% include "Produkte/bestellungen_item.html" with items=rest menge=True bild=True datum=True %}
+  {% include "Produkte/bestellungen_item.html" with items=rest menge=True bild=False datum=True %}
   {% endwith %}{% else %}
   <div class="separator" style="margin-bottom: 100px">
     <h2>Keine sonstigen Bestellungen</h2>
