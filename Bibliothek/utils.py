@@ -95,9 +95,12 @@ def get_collection(collection):
                 # local_book.sprache = langs[language] if language in langs else language
                 local_book.language = language
 
+            anzahl = 0
             for tag in book['data']['tags']:
-                if tag['tag'] in ['Hoppe', 'Baader', 'schuetz', 'schütz', 'Schütz']:
-                    local_book.anzahl_leihen = 1
+                if tag['tag'] in ['Hoppe', 'Baader', 'schuetz', 'schütz', 'Schütz', 'Taghizadegan']:
+                    anzahl_kaufen += 1
+            
+            local_book.anzahl_kaufen = anzahl_kaufen
 
             # # Reset all children in case they where removed
             # for format in arten_liste:

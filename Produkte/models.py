@@ -76,7 +76,7 @@ arten_attribute = {
     'epub': (False, 'EPUB Download', 'EPUB'),
     'mobi': (False, 'Kindle (Mobi) Download', 'Kindle'),
     'druck': (10, 'Neu kaufen', 'Neu'),
-    'kaufen': (1, 'Gebraucht kaufen', 'Gebraucht'),
+    'kaufen': (1, 'Zum Kauf auswählen', 'Verkauf'),
     'leihen': (1, 'Zur Leihe auswählen', 'Verleih'),
     'buchung': (1, 'Buchen', ''),
 }

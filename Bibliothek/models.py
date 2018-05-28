@@ -26,7 +26,7 @@ class Zotero_Buch(KlasseMitProdukten):
         'Englisch': ['English', 'en']
     }
     langs = dict([(v, k) for k, values in trans.items() for v in values])
-    arten_liste = ['kaufen', 'leihen', 'druck', 'pdf', 'mobi', 'epub']
+    arten_liste = ['kaufen', 'leihen', 'pdf', 'mobi', 'epub']
 
     autoren = models.ManyToManyField(Autor)
     jahr = models.DateField(blank=True, null=True)
