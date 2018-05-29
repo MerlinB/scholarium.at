@@ -59,8 +59,7 @@ def liste_buecher(request, collection=None):
         types_dict = {}
         if arten_attribute[type][0]:
             types_dict['anzahl_%s__gt' % type] = 0
-            if type == 'leihen':
-                types_dict['preis_druck__gt'] = 0
+            types_dict['preis_%s__gt' % type] = 0  # Bücher nur mit festgelegtem Preis verkaufen.
         else:
             types_dict['ob_%s' % type] = True
             types_dict['%s__isnull' % type] = False

@@ -250,3 +250,5 @@ RELEASE_PERIOD = 6
 GOOGLE_ANALYTICS = {
     'google_analytics_id': 'UA-117190689-1',
 }
+
+from .local_settings import *

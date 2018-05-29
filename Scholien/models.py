@@ -1,100 +1,65 @@
-"""
-Die Modelle der Scholien-Artikel und Büchlein
-"""
-
 from django.db import models
-from django.core.files import File
-from urllib.request import urlopen
-import os
-import io
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-
-from seite.models import Grundklasse
-from Produkte.models import KlasseMitProdukten
+from Produkte.models import ProductBase
 from Workflow.utils import markdown_to_html
 
 
-class Artikel(Grundklasse):
-    inhalt = models.TextField()
-    inhalt_nur_fuer_angemeldet = models.TextField(null=True, blank=True)
-    inhalt2 = models.TextField(null=True, blank=True)
-    literatur = models.TextField(null=True, blank=True)
-    datum_publizieren = models.DateField(null=True, blank=True)
-    prioritaet = models.PositiveSmallIntegerField(default=0)
+class Article(ProductBase):
+    text = models.TextField()
+    text_hidden = models.TextField(null=True, blank=True)
+    text_2 = models.TextField(null=True, blank=True)
+    references = models.TextField(null=True, blank=True)
+    date_publish = models.DateField(null=True, blank=True)
+    priority = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = "Artikel"
         verbose_name = "Artikel"
-        ordering = ['-datum_publizieren']
+        ordering = ['-date_publish']
 
 
-class MarkdownArtikel(Grundklasse):
+class MarkdownArticle(ProductBase):
     text = models.TextField()
-    prioritaet = models.PositiveSmallIntegerField(default=0)
-    artikel = models.OneToOneField(Artikel, on_delete=models.SET_NULL, null=True, blank=True)
+    priority = models.PositiveSmallIntegerField(default=0)
+    article = models.OneToOneField(Article, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Markdown Artikel"
         verbose_name = "Markdown Artikel"
-        ordering = ['-zeit_erstellt']
 
-    def artikel_erstellen(self):
-        inhalt, inhalt_angemeldet, inhalt2, literatur = markdown_to_html(self.text)
-        if self.artikel:
-            art = self.artikel
+    def create_article(self):
+        text, text_hidden, text_2, references = markdown_to_html(self.text)
+        if self.article:
+            art = self.article
+            art.name = self.name
             art.slug = self.slug
-            art.bezeichnung = self.bezeichnung
-            art.inhalt = inhalt
-            art.inhalt_nur_fuer_angemeldet = inhalt_angemeldet
-            art.inhalt2 = inhalt2
-            art.literatur = literatur
-            art.prioritaet = self.prioritaet
-        elif Artikel.objects.filter(slug=self.slug).exists():
+            art.text = text
+            art.text_hidden = text_hidden
+            art.text_2 = text_2
+            art.references = references
+            art.priority = self.priority
+        elif Article.objects.filter(slug=self.slug).exists():
             raise ValidationError('Artikel-slug existiert bereits.')
         else:
-            art = Artikel.objects.create(slug=self.slug, bezeichnung=self.bezeichnung, inhalt=inhalt,
-                                         inhalt_nur_fuer_angemeldet=inhalt_angemeldet, inhalt2=inhalt2, literatur=literatur, prioritaet=self.prioritaet)
-            self.artikel = art
+            art = Article.objects.create(slug=self.slug, name=self.name, text=text,
+                                         text_hidden=text_hidden, text_2=text_2,
+                                         references=references, priority=self.priority)
+            self.article = art
         art.save()
-        print('%s erfolgreich gespeichert.' % self.bezeichnung)
+        print('%s erfolgreich gespeichert.' % self.name)
 
     def save(self, *args, **kwargs):
-        self.artikel_erstellen()
+        self.create_article()
         super().save(*args, **kwargs)
 
 
-class Buechlein(KlasseMitProdukten):
-    pdf = models.FileField(upload_to='scholienbuechlein', null=True, blank=True)
-    epub = models.FileField(upload_to='scholienbuechlein', null=True, blank=True)
-    mobi = models.FileField(upload_to='scholienbuechlein', null=True, blank=True)
-    bild = models.ImageField(upload_to='scholienbuechlein', null=True, blank=True)
-    beschreibung = models.TextField(max_length=2000, null=True, blank=True)
-    alte_nr = models.SmallIntegerField(null=True, editable=False)
-    arten_liste = ['druck', 'pdf', 'epub', 'mobi']
+class Booklet(ProductBase):
+    image = models.ImageField(upload_to='scholienbuechlein', null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('Scholien:buechlein_detail', kwargs={'slug': self.slug})
 
-    def preis_ausgeben(self, art):
-        if self.finde_preis(art):
-            return self.finde_preis(art)
-        else:
-            if art == 'druck':
-                return 15
-            else:
-                return 5
-
-    def bild_holen(self, bild_url, dateiname):
-        response = urlopen(bild_url)
-        datei_tmp = io.BytesIO(response.read())
-        self.bild.save(
-            os.path.basename(dateiname),
-            File(datei_tmp)
-            )
-        self.save()
-
     class Meta:
         verbose_name_plural = "Büchlein"
         verbose_name = "Büchlein"
-        ordering = ['-alte_nr']

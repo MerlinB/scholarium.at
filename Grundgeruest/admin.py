@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from guardian.admin import GuardedModelAdmin
 from userena.models import UserenaSignup
 
-from .models import Hauptpunkt, Unterpunkt, ScholariumProfile, Mitwirkende, Unterstuetzung
+from .models import Menue, Menuepunkt, ScholariumProfile, Mitwirkende, Unterstuetzung
 
 
 class StufenPlusUnterstuetzerListFilter(admin.SimpleListFilter):  # Nicht in Benutzung, Unterstützung.stufe ist nicht mehr möglich.
@@ -40,16 +40,6 @@ class ProfileAdmin(admin.ModelAdmin):
 admin.site.register(ScholariumProfile, ProfileAdmin)
 
 
-class UnterpunktInline(admin.TabularInline):
-    model = Unterpunkt
-    fields = ('bezeichnung', 'slug')
-    extra = 1
-
-
-class HauptpunktAdmin(admin.ModelAdmin):
-    inlines = [UnterpunktInline]
-
-
 class UnterstuetzungAdmin(admin.ModelAdmin):
     model = Unterstuetzung
     search_fields = ['profil__user__email',
@@ -58,8 +48,8 @@ class UnterstuetzungAdmin(admin.ModelAdmin):
     list_filter = ['datum', 'stufe']
 
 
-admin.site.register(Hauptpunkt, HauptpunktAdmin)
-admin.site.register(Unterpunkt)
+admin.site.register(Menue)
+admin.site.register(Menuepunkt)
 admin.site.register(Mitwirkende)
 admin.site.register(Unterstuetzung, UnterstuetzungAdmin)
 

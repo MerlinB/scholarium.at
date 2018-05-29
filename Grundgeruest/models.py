@@ -1,60 +1,13 @@
-"""
-Die Modelle für Projektweite Daten: Menüpunkte, Nutzer/Profile
-
- - eingegeben wird eine slug (absolut, bezüglich /) und eine nummer, die die
-   Reihenfolge im Menü bestimmt
- - was wird an das Template übergeben? Vielleicht lieber eine Liste für jede
-   Nutzerkategorie erstellen? Dann fällt nummer weg.
-"""
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from userena.models import UserenaBaseProfile, UserenaSignup
 from userena.utils import generate_sha1
-from django.core.validators import RegexValidator
 import random
 from django_countries.fields import CountryField
-from datetime import datetime, date, timedelta
-
-from seite.models import Grundklasse
-from Produkte.models import Spendenstufe
-
-
-class Menuepunkt(Grundklasse):
-    sichtbar_ab = models.IntegerField(
-        blank=True,
-        default=0)
-    nummer = models.IntegerField(default=1)
-
-    class Meta:
-        abstract = True
-        ordering = ['nummer']
-
-
-class GanzesMenue(Grundklasse):
-    pass
-
-
-class Hauptpunkt(Menuepunkt):
-    gehoert_zu = models.ForeignKey(GanzesMenue)
-
-    class Meta:
-        verbose_name_plural = 'Menü - Hauptpunkte'
-
-
-class Unterpunkt(Menuepunkt):
-    gehoert_zu = models.ForeignKey(Hauptpunkt)
-
-    class Meta:
-        verbose_name_plural = 'Menü - Unterpunkte'
-
-    def __str__(self):
-        return "{}: {} - {}".format(
-            self.gehoert_zu.gehoert_zu.bezeichnung,
-            self.gehoert_zu.bezeichnung,
-            self.bezeichnung)
+import datetime
+from Produkte.models import ProductBase
 
 
 class Nutzer(AbstractUser):
@@ -76,9 +29,6 @@ class Nutzer(AbstractUser):
     @staticmethod
     def erzeuge_username():
         return Nutzer.erzeuge_zufall(12)
-
-    def hat_guthaben(self):
-        return bool(self.my_profile.guthaben)
 
     @classmethod
     def leeren_anlegen(cls):
@@ -153,17 +103,7 @@ class ScholariumProfile(UserenaBaseProfile):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 unique=True,
                                 verbose_name=_('user'),
-                                related_name='my_profile')
-    stufe_choices = [(0, 'Interessent'),  # TODO: Delete.
-                     (1, 'Gast'),
-                     (2, 'Teilnehmer'),
-                     (3, 'Scholar'),
-                     (4, 'Partner'),
-                     (5, 'Beirat'),
-                     (6, 'Patron')]
-    stufe = models.IntegerField(  # TODO: Delete.
-        choices=stufe_choices,
-        default=0)
+                                related_name='profile')
     anrede = models.CharField(
         max_length=4,
         choices=[('Herr', 'Herr'), ('Frau', 'Frau')],
@@ -193,21 +133,6 @@ class ScholariumProfile(UserenaBaseProfile):
     anredename = models.CharField(
         max_length=30,
         null=True, blank=True)
-    letzte_zahlung = models.DateField(null=True, blank=True)  # TODO: Delete.
-    datum_ablauf = models.DateField(null=True, blank=True)  # TODO: Delete.
-    alt_id = models.SmallIntegerField(
-        default=0, editable=False)
-    alt_notiz = models.CharField(
-        max_length=255, null=True,
-        default='', editable=False)
-    alt_scholien = models.SmallIntegerField(
-        default=0, null=True, editable=False)
-    alt_mahnstufe = models.SmallIntegerField(
-        default=0, null=True, editable=False)
-    alt_gave_credits = models.SmallIntegerField(
-        default=0, null=True, editable=False)
-    alt_registration_ip = models.GenericIPAddressField(
-        editable=False, null=True)
 
     def get_aktiv(self):
         '''Gibt HÖCHSTE aktive Unterstützung zurück'''
@@ -265,31 +190,57 @@ class ScholariumProfile(UserenaBaseProfile):
         verbose_name_plural = 'Nutzerprofile'
 
 
-class Unterstuetzung(models.Model):
-    DEFAULT_DURATION = timedelta(days=365)
-
-    profil = models.ForeignKey(ScholariumProfile, on_delete=models.CASCADE)
-    stufe = models.ForeignKey(Spendenstufe, on_delete=models.PROTECT)
-    datum = models.DateField(default=date.today)
-    zahlungsmethode = models.CharField(blank=True, max_length=100)
-    ueberprueft = models.BooleanField(default=False)
-    notiz = models.TextField(blank=True)
+class DonationLevel(ProductBase):
+    id = models.IntegerField(primary_key=True)
+    amount = models.SmallIntegerField()
 
     class Meta:
+        verbose_name = "Spendenstufe"
+        verbose_name_plural = "Spendenstufen"
+
+    def __str__(self):
+        return '%s: %s (%d)' % (self.id, self.name, self.amount)
+    
+
+class Donation(models.Model):
+    DEFAULT_DURATION = datetime.timedelta(days=365)
+
+    profile = models.ForeignKey(ScholariumProfile, on_delete=models.CASCADE)
+    level = models.ForeignKey(DonationLevel, on_delete=models.PROTECT)
+    date = models.DateField(default=datetime.date.today)
+    payment_method = models.CharField(blank=True, max_length=100)
+    review = models.BooleanField(default=False)
+    note = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = 'Unterstützung'
         verbose_name_plural = 'Unterstuetzungen'
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.profil.guthaben_aufladen(self.stufe.spendenbeitrag)
-            self.profil.save()
-        super(Unterstuetzung, self).save(*args, **kwargs)
+            self.profile.guthaben_aufladen(self.level.amount)
+            self.profile.save()
+        super(Donation, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s: %s (%s)' % (self.profil.user.get_full_name(), self.stufe.bezeichnung, self.datum)
+        return '%s: %s (%s)' % (self.profile.user.get_full_name(), self.level.name, self.date)
 
-    def get_ablauf(self):
+    def get_expiration(self):
         '''Gibt Ablaufdatum der Unterstützung zurück.'''
         return self.datum + self.DEFAULT_DURATION
+
+
+class Menue(Grundklasse):
+    stufe = models.ManyToManyField(Spendenstufe)
+
+
+class Menuepunkt(Grundklasse):
+    menue = models.ForeignKey(Menue, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+        ordering = ['nummer']
 
 
 class Mitwirkende(models.Model):
